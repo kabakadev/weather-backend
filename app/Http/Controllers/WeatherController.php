@@ -16,6 +16,22 @@ class WeatherController extends Controller
 
         $response = Http::get($url);
 
-        return $response->json();
+        if ($response->failed()){
+            return response()->json(['error' => 'Failed to fetch weather data'], 500);
+        }
+        $data = $response->json();
+
+        return [
+            'city' => $data['name'],
+            'unit' => $unit === 'imperial' ? 'F' : 'C',
+            'temperature' => round($data['main']['temp']),
+            'description' => $data['weather'][0]['description'],
+            'icon' => $data['weather'][0]['icon'],
+            'humidity' => $data['main']['humidity'],
+            'wind_speed' => $data['wind']['speed'],
+            //forecast placeholder
+            'forecast' => [],
+
+        ];
     }
 }
