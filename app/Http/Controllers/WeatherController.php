@@ -20,39 +20,54 @@ class WeatherController extends Controller
         $unit = $validated['unit'] ?? 'metric';
         $apiKey = env('OPENWEATHER_API_KEY');
 
-        // Get current weather
-        $currentData = $this->getCurrentWeather($city, $unit, $apiKey);
-        if (!$currentData) {
-            return response()->json(['error' => 'Failed to fetch current weather data'], 500);
+        // Step 1: Geocoding API call - NEW
+        $geocodeUrl = "http://api.openweathermap.org/geo/1.0/direct?q={$city}&limit=1&appid={$apiKey}";
+        $geocodeResponse = Http::get($geocodeUrl);
+
+        if ($geocodeResponse->failed() || empty($geocodeResponse->json())) {
+            return response()->json(['error' => 'City not found'], 404);
         }
 
-        // Get forecast (fails gracefully if unavailable)
-        $forecast = $this->getWeatherForecast($city, $unit, $apiKey);
+        $location = $geocodeResponse->json()[0];
+        $lat = $location['lat'];
+        $lon = $location['lon'];
+        $exactCityName = $location['name'] . ($location['state'] ?? '' ? ', ' . $location['state'] : '');
+
+        // Step 2: Get current weather - MODIFIED to use coordinates
+        $currentWeather = $this->getCurrentWeather($lat, $lon, $unit, $apiKey);
+        if (!$currentWeather) {
+            return response()->json(['error' => 'Failed to fetch weather data'], 500);
+        }
+
+        // Step 3: Get forecast - MODIFIED to use coordinates
+        $forecast = $this->getWeatherForecast($lat, $lon, $unit, $apiKey);
 
         return [
-            'city' => $currentData['name'],
+            'city' => $exactCityName, // Using the precise name from geocoding
             'unit' => $unit === 'imperial' ? 'F' : 'C',
-            'temperature' => round($currentData['main']['temp']),
-            'description' => $currentData['weather'][0]['description'],
-            'icon' => $currentData['weather'][0]['icon'],
-            'humidity' => $currentData['main']['humidity'],
-            'wind_speed' => $currentData['wind']['speed'],
+            'temperature' => round($currentWeather['main']['temp']),
+            'description' => $currentWeather['weather'][0]['description'],
+            'icon' => $currentWeather['weather'][0]['icon'],
+            'humidity' => $currentWeather['main']['humidity'],
+            'wind_speed' => $currentWeather['wind']['speed'],
+            'wind_direction' => $currentWeather['wind']['deg'] ?? null,
             'forecast' => $forecast,
         ];
     }
 
-    protected function getCurrentWeather($city, $unit, $apiKey)
+    // MODIFIED to use coordinates instead of city name
+    protected function getCurrentWeather($lat, $lon, $unit, $apiKey)
     {
-        $url = "https://api.openweathermap.org/data/2.5/weather?q={$city}&units={$unit}&appid={$apiKey}";
+        $url = "https://api.openweathermap.org/data/2.5/weather?lat={$lat}&lon={$lon}&units={$unit}&appid={$apiKey}";
         $response = Http::timeout(10)->get($url);
-        
         return $response->successful() ? $response->json() : null;
     }
 
-    protected function getWeatherForecast($city, $unit, $apiKey)
+    // MODIFIED to use coordinates instead of city name
+    protected function getWeatherForecast($lat, $lon, $unit, $apiKey)
     {
         try {
-            $url = "https://api.openweathermap.org/data/2.5/forecast?q={$city}&units={$unit}&cnt=40&appid={$apiKey}";
+            $url = "https://api.openweathermap.org/data/2.5/forecast?lat={$lat}&lon={$lon}&units={$unit}&cnt=40&appid={$apiKey}";
             $response = Http::timeout(10)->get($url);
             
             if ($response->successful()) {
@@ -61,10 +76,10 @@ class WeatherController extends Controller
         } catch (\Exception $e) {
             \Log::error("Forecast error: " . $e->getMessage());
         }
-        
         return [];
     }
 
+    // UNCHANGED - your existing forecast processing
     protected function processForecastData(array $forecastItems): array
     {
         $dailyData = [];
