@@ -40,7 +40,7 @@ Provides city suggestions and weather data via API for a frontend weather dashbo
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-repo/weather-backend.git
+git clone https://github.com/kabakadev/weather-backend
 cd weather-backend
 ```
 
