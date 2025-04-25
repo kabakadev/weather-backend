@@ -16,7 +16,7 @@ Provides city suggestions and weather data via API for a frontend weather dashbo
 
 ### ✅ Weather Data
 
--   `GET /api/weather?city={name}&unit=C|F` — Returns current weather details for a given city with temperature in Celsius or Fahrenheit
+-   `GET /api/weather?city={query}&unit=${query}` — Returns current weather details for a given city with temperature in Celsius or Fahrenheit
 
 ---
 
