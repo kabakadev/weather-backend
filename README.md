@@ -145,4 +145,4 @@ MIT License - Free for open-source use.
 
 ## 📩 Contributing
 
-For bug reports or feature suggestions, reach out to: [iankabaka1@gmail.com](mailto:iankabaka1@gmail.com)
+For bug reports or feature suggestions, reach out to: my personal [email](mailto:iankabaka1@gmail.com)
