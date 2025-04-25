@@ -72,30 +72,59 @@ Runs at `http://localhost:8000` by default.
 
 ### 1. City Suggestions
 
--   **Endpoint:** `GET /api/city-suggestions?q=Berlin`
+-   **Endpoint:** `GET http://localhost:8000/api/city-suggestions?q=Ber`
 
 #### Example Response:
 
 ```json
-["Berlin, Germany", "Berlin, Connecticut, US", "Berlin, New Hampshire, US"]
+[
+    "Berg, Grand Est, FR",
+    "Veria, Macedonia and Thrace, GR",
+    "B\u00e9r, HU",
+    "Ber, Timbuktu, ML",
+    "Ber, Rajasthan, IN"
+]
 ```
 
 ### 2. Weather Data
 
--   **Endpoint:** `GET /api/weather?city=Berlin&unit=C`
+-   **Endpoint:** `GET http://localhost:8000/api/weather?city=Nairobi&unit=metric`
 
 #### Example Response:
 
 ```json
 {
-    "city": "Berlin",
-    "temperature": 22.5,
+    "city": "Nairobi, Nairobi County",
     "unit": "C",
-    "description": "Partly Cloudy",
-    "icon": "02d",
-    "humidity": 65,
-    "wind_speed": 4.5,
-    "forecast": []
+    "temperature": 20,
+    "description": "overcast clouds",
+    "icon": "04d",
+    "humidity": 70,
+    "wind_speed": 3.38,
+    "wind_direction": 74,
+    "forecast": [
+        {
+            "day": "26 Apr",
+            "icon": "01d",
+            "high": 25,
+            "low": 14,
+            "description": "clear sky"
+        },
+        {
+            "day": "27 Apr",
+            "icon": "02d",
+            "high": 26,
+            "low": 14,
+            "description": "few clouds"
+        },
+        {
+            "day": "28 Apr",
+            "icon": "03d",
+            "high": 25,
+            "low": 16,
+            "description": "scattered clouds"
+        }
+    ]
 }
 ```
 
