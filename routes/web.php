@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Health check for Railway
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json(['status' => 'ok']);
 });
+
+
