@@ -5,6 +5,10 @@ use App\Http\Controllers\WeatherController;
 use Illuminate\Http\Request; // Add this import
 use Illuminate\Support\Facades\Http; // You'll also need this for the Http facade
 
+Route::get('/', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 Route::get('/ping', function () {
     return 'pong';
 });
