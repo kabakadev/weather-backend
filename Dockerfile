@@ -1,35 +1,26 @@
-# 1. Base image with PHP CLI and extensions
+# 1. Base image
 FROM php:8.2-cli
 
-# 2. Install OS-level deps (for MySQL, Git, unzip, etc.)
+# 2. OS deps for Laravel
 RUN apt-get update && apt-get install -y \
-    unzip \
-    git \
-    libzip-dev \
-    libonig-dev \
-    libpq-dev \
-    libxml2-dev \
+    unzip git libzip-dev libonig-dev libpq-dev libxml2-dev \
   && docker-php-ext-install pdo_mysql zip mbstring xml
 
 # 3. Install Composer
-RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sSL https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer
 
-# 4. Set working directory
+# 4. Set working dir
 WORKDIR /app
 
-# 5. Copy only composer files, install deps (layer cache)
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-# 6. Copy the rest of the code
+# 5. Copy all your code (including artisan, routes/, app/, etc.)
 COPY . .
 
-# 7. Generate APP_KEY if you want, or set it via Railway env var
-#    (you can skip this if you set APP_KEY in Railway directly)
-# RUN php artisan key:generate
+# 6. Now install dependencies (artisan is present, so package:discover will succeed)
+RUN composer install --no-dev --optimize-autoloader
 
-# 8. Expose the port (optional, for clarity)
+# 7. Expose (optional)
 EXPOSE 8080
 
-# 9. Start the server on Railway’s dynamic port
+# 8. Start server binding to Railway’s $PORT (fallback to 8080 locally)
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
